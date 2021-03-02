@@ -2,14 +2,70 @@ version: '3'
 
 services:
 
-  # The Database
-  mysql_database:
-    container_name: mysql_database
+  nginx:
+    container_name: nginx
+    build:
+      context: .
+      dockerfile: .docker/nginx/Dockerfile
+    working_dir: /var/www
+    volumes:
+      - ./backend/:/var/www/api
+      - ./nuxt/:/var/www/client
+      - .docker/data/nginx/logs:/var/log/nginx
+    restart: always
+    links:
+      - php
+      - nuxt
+    ports:
+      # Nuxt port
+      - ${NUXT_IPPORT_HOST}:${NUXT_PORT_CONTAINER}
+      # Laravel port
+      - ${LARAVEL_IPPORT_HOST}:${LARAVEL_PORT_CONTAINER}
+    depends_on:
+      - mysql
+      - php
+      - nuxt
+
+  php:
+    container_name: php
+    build:
+      context: .
+      dockerfile: .docker/php_fpm/Dockerfile
+    working_dir: /var/www/
+    volumes:
+      - ./backend:/var/www/
+    environment:
+      # To cancel xDebug, set remote_enable=0
+      XDEBUG_CONFIG: "remote_enable=1"
+      PHP_IDE_CONFIG: "serverName=Docker"
+    ports:
+      - 9001:9000
+    links:
+      - mysql
+    depends_on:
+      - mysql
+
+  supervisor:
+    container_name: supervisor
+    build:
+      context: .
+      dockerfile: .docker/supervisor/Dockerfile
+    volumes:
+      - ./backend/:/var/www/
+      - ./.docker/supervisor/conf.d:/etc/supervisor/conf.d
+      - ./.docker/data/supervisor/logs:/var/log
+    links:
+      - mysql
+      - redis
+
+  mysql:
+    container_name: mysql
     build:
       context: .
       dockerfile: .docker/db-mysql/Dockerfile
     volumes:
-      - .docker/data/mysql:/var/lib/mysql
+      - database:/var/lib/mysql
+      - ./.docker/mysql/mysqlconf:/etc/mysql/conf.d
     ports:
         - 33061:3306
     environment:
@@ -19,50 +75,37 @@ services:
       - "MYSQL_ROOT_PASSWORD=pass"
     restart: always
 
-  php_fpm:
-    container_name: php_fpm
-    build:
-      context: .
-      dockerfile: .docker/php_fpm/Dockerfile
-    working_dir: /var/www/
-    volumes:
-      - ./backend:/var/www/
-    ports:
-      - 9001:9000
-    links:
-      - mysql_database
-    depends_on:
-      - mysql_database
-
-  nginx:
-    container_name: nginx
-    build:
-      context: .
-      dockerfile: .docker/nginx/Dockerfile
-    working_dir: /var/www
-    volumes:
-      - ./backend/:/var/www/
-      - .docker/data/nginx/logs:/var/log/nginx
-    restart: always
-    links:
-      - php_fpm
-    ports:
-      - ${APP_IPPORT_HOST}:${APP_PORT_CONTAINER}
-    depends_on:
-      - mysql_database
-      - php_fpm
-
   nuxt:
     container_name: nuxt
     build:
       context: .
       dockerfile: .docker/nuxt/Dockerfile
-    working_dir: /web
+    working_dir: /var/www/client
     ports:
       - 3000:3000
     volumes:
-      - ./nuxt:/web
+      - ./nuxt:/var/www/client
     environment:
-      - "APP_ROOT=/web"
+      - "APP_ROOT=/var/www/client"
       - "NODE_ENV=development"
+    command: "npm run dev"
 
+  redis:
+    container_name: redis
+    build:
+      context: .
+      dockerfile: .docker/redis/Dockerfile
+    volumes:
+      - redis:/data
+      - ./.docker/redis/redis.conf:/data/redis.conf
+    ports:
+      - 6379:6379
+
+
+######### Volumes ###################################
+
+volumes:
+  database:
+    driver: local
+  redis:
+    driver: local
