@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+
+  # The Database
+  mysql_database:
+    container_name: mysql_database
+    build:
+      context: .
+      dockerfile: .docker/db-mysql/Dockerfile
+    volumes:
+      - .docker/data/mysql:/var/lib/mysql
+    ports:
+        - 33061:3306
+    environment:
+      - "MYSQL_DATABASE=db-chat"
+      - "MYSQL_USER=root"
+      - "MYSQL_PASSWORD=pass"
+      - "MYSQL_ROOT_PASSWORD=pass"
+    restart: always
+
+  php_fpm:
+    container_name: php_fpm
+    build:
+      context: .
+      dockerfile: .docker/php_fpm/Dockerfile
+    working_dir: /var/www/
+    volumes:
+      - ./backend:/var/www/
+    ports:
+      - 9001:9000
+    links:
+      - mysql_database
+    depends_on:
+      - mysql_database
+
+  nginx:
+    container_name: nginx
+    build:
+      context: .
+      dockerfile: .docker/nginx/Dockerfile
+    working_dir: /var/www
+    volumes:
+      - ./backend/:/var/www/
+      - .docker/data/nginx/logs:/var/log/nginx
+    restart: always
+    links:
+      - php_fpm
+    ports:
+      - ${APP_IPPORT_HOST}:${APP_PORT_CONTAINER}
+    depends_on:
+      - mysql_database
+      - php_fpm
+
+  nuxt:
+    container_name: nuxt
+    build:
+      context: .
+      dockerfile: .docker/nuxt/Dockerfile
+    working_dir: /web
+    ports:
+      - 3000:3000
+    volumes:
+      - ./nuxt:/web
+    environment:
+      - "APP_ROOT=/web"
+      - "NODE_ENV=development"
+
