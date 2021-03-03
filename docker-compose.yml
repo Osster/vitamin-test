@@ -101,6 +101,25 @@ services:
     ports:
       - 6379:6379
 
+  # The Push Server
+  echo_server:
+    container_name: echo_server
+    build:
+      context: ./.docker/echo-server/
+      dockerfile: Dockerfile
+    ports:
+      - 6001:6001
+    depends_on:
+      - redis
+    environment:
+      - "TZ=${TZ}"
+      - "APP_URL=http://nginx"
+      - "APP_DEBUG=true"
+      - "LES_DB=redis"
+      - "LES_PORT=6001"
+      - "LES_HOST=0.0.0.0"
+      - "REDIS_PORT=6379"
+      - "REDIS_HOST=redis"
 
 ######### Volumes ###################################
 
