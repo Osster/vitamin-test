@@ -12,6 +12,7 @@ services:
       - ./backend/:/var/www/api
       - ./nuxt/:/var/www/client
       - .docker/data/nginx/logs:/var/log/nginx
+      - .docker/data/nginx/conf.d:/etc/nginx/conf.d
     restart: always
     links:
       - php
@@ -21,6 +22,8 @@ services:
       - ${NUXT_IPPORT_HOST}:${NUXT_PORT_CONTAINER}
       # Laravel port
       - ${LARAVEL_IPPORT_HOST}:${LARAVEL_PORT_CONTAINER}
+      # Laravel port
+      - ${ECHO_IPPORT_HOST}:${ECHO_PORT_CONTAINER}
     depends_on:
       - mysql
       - php
@@ -31,9 +34,9 @@ services:
     build:
       context: .
       dockerfile: .docker/php_fpm/Dockerfile
-    working_dir: /var/www/
+    working_dir: /var/www/api/
     volumes:
-      - ./backend:/var/www/
+      - ./backend:/var/www/api/
     environment:
       # To cancel xDebug, set remote_enable=0
       XDEBUG_CONFIG: "remote_enable=1"
@@ -50,13 +53,15 @@ services:
     build:
       context: .
       dockerfile: .docker/supervisor/Dockerfile
+    ports:
+      - 6001:6001
     volumes:
-      - ./backend/:/var/www/
+      - ./backend/:/var/www/api/
       - ./.docker/supervisor/conf.d:/etc/supervisor/conf.d
       - ./.docker/data/supervisor/logs:/var/log
     links:
       - mysql
-      - redis
+#      - redis
 
   mysql:
     container_name: mysql
@@ -90,36 +95,35 @@ services:
       - "NODE_ENV=development"
     command: "npm run dev"
 
-  redis:
-    container_name: redis
-    build:
-      context: .
-      dockerfile: .docker/redis/Dockerfile
-    volumes:
-      - redis:/data
-      - ./.docker/redis/redis.conf:/data/redis.conf
-    ports:
-      - 6379:6379
-
-  # The Push Server
-  echo_server:
-    container_name: echo_server
-    build:
-      context: ./.docker/echo-server/
-      dockerfile: Dockerfile
-    ports:
-      - 6001:6001
-    depends_on:
-      - redis
-    environment:
-      - "TZ=${TZ}"
-      - "APP_URL=http://nginx"
-      - "APP_DEBUG=true"
-      - "LES_DB=redis"
-      - "LES_PORT=6001"
-      - "LES_HOST=0.0.0.0"
-      - "REDIS_PORT=6379"
-      - "REDIS_HOST=redis"
+#  redis:
+#    container_name: redis
+#    build:
+#      context: .
+#      dockerfile: .docker/redis/Dockerfile
+#    volumes:
+#      - redis:/data
+#      - ./.docker/redis/redis.conf:/data/redis.conf
+#    ports:
+#      - 6379:6379
+#
+#  echo_server:
+#    container_name: echo_server
+#    build:
+#      context: ./.docker/echo-server/
+#      dockerfile: Dockerfile
+#    ports:
+#      - 6001:6001
+#    depends_on:
+#      - redis
+#    environment:
+#      - "TZ=${TZ}"
+#      - "APP_URL=http://nginx"
+#      - "APP_DEBUG=true"
+#      - "LES_DB=redis"
+#      - "LES_PORT=6001"
+#      - "LES_HOST=0.0.0.0"
+#      - "REDIS_PORT=6379"
+#      - "REDIS_HOST=redis"
 
 ######### Volumes ###################################
 
