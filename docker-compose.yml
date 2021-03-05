@@ -47,6 +47,7 @@ services:
       - mysql
     depends_on:
       - mysql
+    restart: always
 
   supervisor:
     container_name: supervisor
@@ -61,7 +62,7 @@ services:
       - ./.docker/data/supervisor/logs:/var/log
     links:
       - mysql
-#      - redis
+    restart: always
 
   mysql:
     container_name: mysql
@@ -94,6 +95,7 @@ services:
       - "APP_ROOT=/var/www/client"
       - "NODE_ENV=development"
     command: "npm run dev"
+    restart: always
 
 #  redis:
 #    container_name: redis
