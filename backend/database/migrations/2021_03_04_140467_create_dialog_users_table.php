@@ -13,7 +13,7 @@ class CreateDialogUsersTable extends Migration
      */
     public function up()
     {
-        Schema::create('dialog_users', function (Blueprint $table) {
+        Schema::create('dialog_user', function (Blueprint $table) {
             $table->id();
             $table->bigInteger("dialog_id")->unsigned();
             $table->bigInteger("user_id")->unsigned();
@@ -34,6 +34,6 @@ class CreateDialogUsersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('dialog_users');
+        Schema::dropIfExists('dialog_user');
     }
 }

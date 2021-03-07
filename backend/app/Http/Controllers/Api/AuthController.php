@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -13,9 +14,9 @@ class AuthController extends Controller
      * Handle an authentication attempt.
      *
      * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
 
@@ -46,9 +47,9 @@ class AuthController extends Controller
      * Handle an authentication attempt.
      *
      * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         if (!Auth::guest()) {
 
@@ -68,10 +69,10 @@ class AuthController extends Controller
      * Handle an authentication attempt.
      *
      * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function user(Request $request)
+    public function user(Request $request): JsonResponse
     {
-        return $request->user();
+        return response()->json($request->user());
     }
 }

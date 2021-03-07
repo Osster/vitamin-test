@@ -14,6 +14,10 @@ class Message extends Model
         "body",
     ];
 
+    protected $appends = [
+        'at',
+    ];
+
     public function dialog()
     {
         return $this->belongsTo(Dialog::class, "dialog_id", "id");
@@ -27,5 +31,10 @@ class Message extends Model
     public function attachments()
     {
         return $this->hasMany(Attachment::class, "message_id", "id");
+    }
+
+    public function getAtAttribute()
+    {
+        return $this->updated_at->diffForHumans();
     }
 }
