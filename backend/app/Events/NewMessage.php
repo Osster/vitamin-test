@@ -26,6 +26,12 @@ class NewMessage implements ShouldBroadcast
         $this->message = $message;
     }
 
+    public function broadcastWith() {
+        return [
+            "message" => $this->message
+        ];
+    }
+
     /**
      * Get the channels the event should broadcast on.
      *
@@ -33,6 +39,6 @@ class NewMessage implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('home');
+        return new Channel('home');
     }
 }

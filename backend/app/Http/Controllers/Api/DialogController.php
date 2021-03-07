@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\NewMessage;
 use App\Http\Controllers\Controller;
 use App\Models\Dialog;
 use App\Models\Message;
@@ -76,6 +77,8 @@ class DialogController extends Controller
         $msg->body = $request->body;
 
         $msg->save();
+
+        NewMessage::dispatch($msg);
 
         return response()->json($msg);
     }
