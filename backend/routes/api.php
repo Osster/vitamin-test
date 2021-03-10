@@ -35,8 +35,9 @@ Route::prefix("v1")
         Route::middleware('auth:sanctum')->group(function () {
 
             Route::get('contacts', [\App\Http\Controllers\Api\ContactsController::class, "all"]);
-            Route::get('dialog/{user}', [\App\Http\Controllers\Api\DialogController::class, "index"]);
-            Route::post('dialog/{user}', [\App\Http\Controllers\Api\DialogController::class, "send"]);
+            Route::post('dialog/new/{user}', [\App\Http\Controllers\Api\DialogController::class, "create"]);
+            Route::get('dialog/{dialog}', [\App\Http\Controllers\Api\DialogController::class, "index"]);
+            Route::post('dialog/{dialog}', [\App\Http\Controllers\Api\DialogController::class, "send"]);
 
         });
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\NewMessage;
 use App\Http\Controllers\Controller;
+use App\Models\Contacts;
 use App\Models\Dialog;
 use App\Models\Message;
 use App\Models\User;
@@ -15,8 +16,15 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class DialogController extends Controller
 {
-    public function index(Request $request, User $user): JsonResponse
+    public function index(Request $request, Dialog $dialog): JsonResponse
     {
+        $messages = $dialog->messages()->get();
+
+        return response()->json($messages);
+    }
+
+    public function create(Request $request, User $user): JsonResponse {
+
         $dlg = Dialog::withUser($user)
             ->first();
 
@@ -36,6 +44,19 @@ class DialogController extends Controller
 
                 $dlg->users()->attach($user->id);
 
+                Contacts::query()
+                    ->where(function ($query) use ($user) {
+                        $query
+                            ->where("user_1_id", $user->id)
+                            ->where("user_2_id", Auth::id());
+                    })
+                    ->orWhere(function ($query) use ($user) {
+                        $query
+                            ->where("user_1_id", Auth::id())
+                            ->where("user_2_id", $user->id);
+                    })
+                    ->update(["dialog_id" => $dlg->id]);
+
                 DB::commit();
 
             } catch (\Exception $e) {
@@ -48,29 +69,18 @@ class DialogController extends Controller
 
         }
 
-        $messages = $dlg
-            ? $dlg->messages()->get()
-            : [];
-
-        return response()->json($messages);
+        return response()->json($dlg);
     }
 
-    public function send(Request $request, User $user): JsonResponse
+    public function send(Request $request, Dialog $dialog): JsonResponse
     {
         $this->validate($request, [
             "body" => "required|min:1"
         ]);
 
-        $dlg = Dialog::withUser($user)
-            ->first();
-
-        if (!$dlg) {
-            throw new \Exception("Dialog not found");
-        }
-
         $msg = new Message();
 
-        $msg->dialog_id = $dlg->id;
+        $msg->dialog_id = $dialog->id;
 
         $msg->user_id = Auth::id();
 
@@ -78,7 +88,7 @@ class DialogController extends Controller
 
         $msg->save();
 
-        NewMessage::dispatch($msg);
+        broadcast(new NewMessage($msg))->toOthers();
 
         return response()->json($msg);
     }
