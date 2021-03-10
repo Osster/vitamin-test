@@ -10,7 +10,7 @@ services:
     working_dir: /var/www
     volumes:
       - ./backend/:/var/www/api
-      - ./nuxt/:/var/www/client
+      - ./client/:/var/www/client
       - .docker/data/nginx/logs:/var/log/nginx
       - .docker/data/nginx/conf.d:/etc/nginx/conf.d
     restart: always
@@ -90,7 +90,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./nuxt:/var/www/client
+      - ./client:/var/www/client
     environment:
       - "APP_ROOT=/var/www/client"
       - "NODE_ENV=development"
