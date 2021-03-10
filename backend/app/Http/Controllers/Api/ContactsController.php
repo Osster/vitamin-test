@@ -24,6 +24,11 @@ class ContactsController extends Controller
                 "users.email",
                 "c.dialog_id"
             ])
+            ->where(function ($query) use ($myId) {
+                $query
+                    ->where("user_1_id", $myId)
+                    ->orWhere("user_2_id", $myId);
+            })
             ->get();
 
         return response()->json($contacts);
