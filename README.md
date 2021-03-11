@@ -15,3 +15,19 @@
 <code>php artisan migrate --seed</code>
 <code>php artisan storage:link</code>
 
+## Auth (~\backend\database\seeders\UserSeeder.php)
+<b>User 1 (main):</b><br>
+<b>login:</b> alex@gmail.com<br>
+<b>pass:</b> pass
+
+<b>User 2:</b><br>
+<b>login:</b> jane@gmail.com<br>
+<b>pass:</b> pass
+
+<b>User 3:</b><br>
+<b>login:</b> rick@gmail.com<br>
+<b>pass:</b> pass
+
+<b>User 4:</b><br>
+<b>login:</b> morty@gmail.com<br>
+<b>pass:</b> pass
