@@ -28,6 +28,8 @@
         :key="messagesKey"
         :messages="messages"
         :contact="contactId"
+        @edit="onMessageEdit"
+        @delete="onMessageDelete"
       />
       <message-form
         v-if="contactId"
@@ -96,6 +98,10 @@ export default {
         this.$store.dispatch('dialog/receive', data.message)
         this.scrollDown()
       })
+      .listen('DeleteMessage', (data) => {
+        this.$store.dispatch('dialog/clear', data.message)
+        this.scrollDown()
+      })
     this.scrollDown()
   },
   methods: {
@@ -130,8 +136,21 @@ export default {
         // console.error(e.toString())
       }
     },
+    async onMessageDelete (message) {
+      await this.$store.dispatch('dialog/delete', {
+        dialogId: message.dialog_id,
+        messageId: message.id
+      })
+      console.log('delete', message)
+    },
     onBackToList () {
       this.$store.dispatch('contacts/select', null)
+    },
+    onMessageEdit (message) {
+      this.message = {
+        id: message.id,
+        body: message.body
+      }
     },
     scrollDown () {
       this.$nextTick(() => {

@@ -37,4 +37,15 @@ class Message extends Model
     {
         return $this->updated_at->diffForHumans();
     }
+
+    public function getAttachmentsAttribute()
+    {
+        $attachments = [];
+
+        foreach ($this->attachments as $attachment) {
+            $attachments[] = $attachment->public_path;
+        }
+
+        return $attachments;
+    }
 }

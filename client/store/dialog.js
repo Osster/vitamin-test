@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import * as Cookies from 'js-cookie'
 import cookie from 'cookie'
+import FormData from 'form-data'
 
 export const store = () => ({
   waiting: false,
@@ -41,6 +42,12 @@ export const mutations = {
       state.items[message.dialog_id] = {}
     }
     Vue.set(state.items[message.dialog_id], message.id, message)
+  },
+  clearMessage (state, { dialogId, messageId }) {
+    if (typeof state.items[dialogId] === 'undefined') {
+      state.items[dialogId] = {}
+    }
+    Vue.delete(state.items[dialogId], messageId)
   }
 }
 
@@ -74,8 +81,32 @@ export const actions = {
   async send ({ commit }, { dialogId, message }) {
     commit('setWaiting', true)
     try {
-      const dbMessage = await this.$axios.$post(`api/v1/dialog/${dialogId}`, message)
+      const data = new FormData()
+      data.append('id', message.id)
+      data.append('body', message.body)
+      if (message.files.length) {
+        data.append('file', message.files[0], message.files[0].fileName)
+      }
+      const dbMessage = await this.$axios.$post(
+        `api/v1/dialog/${dialogId}`,
+        data,
+        {
+          headers: {
+            accept: 'application/json',
+            'Content-Type': 'multipart/form-data'
+          }
+        })
       commit('addMessage', dbMessage)
+    } catch (e) {
+      // console.error(e.toString())
+    }
+    commit('setWaiting', false)
+  },
+  async delete ({ commit }, { dialogId, messageId }) {
+    commit('setWaiting', true)
+    try {
+      await this.$axios.$delete(`api/v1/dialog/${dialogId}/${messageId}`)
+      commit('clearMessage', { dialogId, messageId })
     } catch (e) {
       // console.error(e.toString())
     }
@@ -93,5 +124,11 @@ export const actions = {
   },
   receive ({ commit }, wsMessage) {
     commit('addMessage', wsMessage)
+  },
+  clear ({ commit }, wsMessage) {
+    commit('clearMessage', {
+      dialogId: wsMessage.dialog_id,
+      messageId: wsMessage.id
+    })
   }
 }

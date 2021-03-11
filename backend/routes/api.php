@@ -38,6 +38,7 @@ Route::prefix("v1")
             Route::post('dialog/new/{user}', [\App\Http\Controllers\Api\DialogController::class, "create"]);
             Route::get('dialog/{dialog}', [\App\Http\Controllers\Api\DialogController::class, "index"]);
             Route::post('dialog/{dialog}', [\App\Http\Controllers\Api\DialogController::class, "send"]);
+            Route::delete('dialog/{dialog}/{message}', [\App\Http\Controllers\Api\DialogController::class, "delete"]);
 
         });
 

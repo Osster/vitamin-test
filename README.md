@@ -6,9 +6,12 @@
 1. <code>docker-compose build</code> - may take up to 10 minutes
 2. <code>docker-compose up -d</code>
 
-### Update database (MySql 8 feature)
+### Update database (MySql 8 feature) (run inside mysql)
 1. <code>FLUSH PRIVILEGES;</code>
 2. <code>ALTER USER 'root' IDENTIFIED WITH mysql_native_password BY 'pass';</code>
 
-## Docker Env Example
-https://github.com/nevadskiy/laravel-nuxt-docker
+
+### Artisan (run inside php_fpm)
+<code>php artisan migrate</code>
+<code>php artisan storage:link</code>
+

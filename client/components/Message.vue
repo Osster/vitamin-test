@@ -1,12 +1,29 @@
 <template>
   <div
     class="message border rounded-lg bg-green-500 text-white py-4 px-6 my-1 text-left"
-    :class="contact === message.user_id ? 'bg-green-500 self-start' : 'bg-blue-500 self-end'"
+    :class="$auth.user.id === message.user_id ? 'bg-blue-500 self-end' : 'bg-green-500 self-start'"
   >
+    <div v-if="message.attachments.length">
+      <div
+        v-for="attach in message.attachments"
+        :key="attach.id"
+        class="h-36 px-2 py-2"
+      >
+        <a :href="attach.public_path" target="_blank">
+          <img
+            :src="attach.public_path"
+            :alt="attach.hash"
+            class="h-32"
+          >
+        </a>
+      </div>
+    </div>
     <div class="text-md" v-html="displayBody" />
     <div class="text-xs text-grey-300">
       {{ message.at }}
     </div>
+    <button v-if="$auth.user.id === message.user_id" class="text-yellow-200" @click="onMessageEdit">Edit</button>
+    <button v-if="$auth.user.id === message.user_id" class="text-red-500" @click="onMessageDelete">Delete</button>
   </div>
 </template>
 
@@ -26,6 +43,14 @@ export default {
   computed: {
     displayBody () {
       return this.message.body.replaceAll(/\n/g, '<br>')
+    }
+  },
+  methods: {
+    onMessageEdit () {
+      this.$emit('edit', this.message)
+    },
+    onMessageDelete () {
+      this.$emit('delete', this.message)
     }
   }
 }

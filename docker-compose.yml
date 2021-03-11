@@ -12,7 +12,7 @@ services:
       - ./backend/:/var/www/api
       - ./client/:/var/www/client
       - .docker/data/nginx/logs:/var/log/nginx
-      - .docker/data/nginx/conf.d:/etc/nginx/conf.d
+#      - .docker/data/nginx/conf.d:/etc/nginx/conf.d
     restart: always
     links:
       - php
@@ -96,36 +96,6 @@ services:
       - "NODE_ENV=development"
     command: "npm run dev"
     restart: always
-
-#  redis:
-#    container_name: redis
-#    build:
-#      context: .
-#      dockerfile: .docker/redis/Dockerfile
-#    volumes:
-#      - redis:/data
-#      - ./.docker/redis/redis.conf:/data/redis.conf
-#    ports:
-#      - 6379:6379
-#
-#  echo_server:
-#    container_name: echo_server
-#    build:
-#      context: ./.docker/echo-server/
-#      dockerfile: Dockerfile
-#    ports:
-#      - 6001:6001
-#    depends_on:
-#      - redis
-#    environment:
-#      - "TZ=${TZ}"
-#      - "APP_URL=http://nginx"
-#      - "APP_DEBUG=true"
-#      - "LES_DB=redis"
-#      - "LES_PORT=6001"
-#      - "LES_HOST=0.0.0.0"
-#      - "REDIS_PORT=6379"
-#      - "REDIS_HOST=redis"
 
 ######### Volumes ###################################
 

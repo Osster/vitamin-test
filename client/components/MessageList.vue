@@ -8,6 +8,8 @@
       :key="message.id"
       :message="message"
       :contact="contact"
+      @edit="onMessageEdit"
+      @delete="onMessageDelete"
     />
   </div>
 </template>
@@ -30,6 +32,14 @@ export default {
       if (newContact !== null && newContact !== oldContact) {
         // fetch messages
       }
+    }
+  },
+  methods: {
+    onMessageEdit (message) {
+      this.$emit('edit', message)
+    },
+    onMessageDelete (message) {
+      this.$emit('delete', message)
     }
   }
 }
