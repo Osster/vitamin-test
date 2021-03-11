@@ -67,7 +67,7 @@ export default {
         files: this.files
       }
       this.message = ''
-      this.file = null
+      this.files = []
       this.$refs.preview.innerHTML = ''
       this.$nextTick(() => {
         this.$emit('input', data)
