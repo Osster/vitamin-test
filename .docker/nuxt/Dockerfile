@@ -6,6 +6,7 @@ ENV HOST 0.0.0.0
 WORKDIR ${APP_ROOT}
 ADD ./client ${APP_ROOT}
 
+RUN apk add g++ make python
 RUN npm ci
 RUN npm i nuxt --global
 RUN npm run build

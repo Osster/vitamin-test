@@ -1,5 +1,5 @@
 <template>
-  <div class="contact-list px-8 py-10 divide-y divide-light-blue-400">
+  <div class="contact-list px-2 py-4 md:px-8 md:py-10 divide-y divide-light-blue-400">
     <a
       v-for="contact in contacts"
       :key="contact.id"

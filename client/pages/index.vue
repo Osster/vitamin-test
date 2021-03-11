@@ -1,21 +1,7 @@
 <template>
-  <div class="container">
-    <div>
-      <div class="links">
-        <nuxt-link v-if="!isLoggedIn" to="/login">
-          <button class="px-6 py-3 border border-green-500 rounded">Login</button>
-        </nuxt-link>
-        <nuxt-link v-if="isLoggedIn" to="/chat">
-          <button class="px-6 py-3 border border-blue-500 rounded">Go to chat</button>
-        </nuxt-link>
-        <button
-          v-if="isLoggedIn"
-          @click="onLogout"
-          class="px-6 py-3 border border-red-500 rounded"
-        >
-          Log out
-        </button>
-      </div>
+  <div class="home-container">
+    <div class="home-title">
+      Welcome to chat
     </div>
   </div>
 </template>
@@ -41,9 +27,9 @@ export default {
 /* Sample `apply` at-rules with Tailwind CSS
 .container {
 @apply min-h-screen flex justify-center items-center text-center mx-auto;
-}
-*/
-.container {
+} */
+
+.home-container {
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
@@ -52,7 +38,7 @@ export default {
   text-align: center;
 }
 
-.title {
+.home-title {
   font-family:
     'Quicksand',
     'Source Sans Pro',
@@ -68,17 +54,5 @@ export default {
   font-size: 100px;
   color: #35495e;
   letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
 }
 </style>

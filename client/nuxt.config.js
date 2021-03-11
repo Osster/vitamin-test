@@ -23,7 +23,9 @@ export default {
   },
   
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [],
+  css: [
+    "~assets/scss/global.scss"
+  ],
   
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [],
@@ -45,7 +47,8 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     '@nuxtjs/axios',
-    '@nuxtjs/auth-next'
+    '@nuxtjs/auth-next',
+    "@nuxtjs/style-resources"
   ],
   
   // Build Configuration: https://go.nuxtjs.dev/config-build
@@ -100,5 +103,8 @@ export default {
     wsPort: process.env.WEBSOCKET_PORT,
     encrypted: false,
     disableStats: true
+  },
+  styleResources: {
+    scss: ["./assets/scss/*.scss"]
   }
 }

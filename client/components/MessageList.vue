@@ -1,15 +1,14 @@
 <template>
-  <div class="message-list px-8 py-10 divide-y divide-light-blue-400">
-    <div v-if="contact" class="flex flex-col">
-      <message
-        v-for="message in messages"
-        :key="message.id"
-        :message="message"
-        :contact="contact"
-      >
-      </message>
-    </div>
-    <slot v-else></slot>
+  <div
+    v-if="contact"
+    class="message-list px-2 py-4 md:px-8 md:py-10 divide-y divide-light-blue-400 h-5/6 overflow-hidden overflow-y-auto flex flex-col"
+  >
+    <message
+      v-for="message in messages"
+      :key="message.id"
+      :message="message"
+      :contact="contact"
+    />
   </div>
 </template>
 

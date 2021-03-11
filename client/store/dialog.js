@@ -17,7 +17,9 @@ export const mutations = {
       Vue.set(state, 'items', {})
     }
     ids.forEach((id) => {
-      Vue.set(state.items, id, {})
+      if (typeof state.items[id] === 'undefined') {
+        Vue.set(state.items, id, {})
+      }
     })
   },
   setId (state, id) {
@@ -25,7 +27,7 @@ export const mutations = {
     Cookies.set('selectedDialog', id)
   },
   setItems (state, items) {
-    const _items = {}
+    const _items = state.items
     items.forEach((i) => {
       if (typeof _items[i.dialog_id] === 'undefined') {
         _items[i.dialog_id] = {}
@@ -65,7 +67,7 @@ export const actions = {
       commit('setId', dialogId)
       commit('setItems', items)
     } catch (e) {
-      console.error(e.toString())
+      // console.error(e.toString())
     }
     commit('setWaiting', false)
   },
@@ -73,10 +75,9 @@ export const actions = {
     commit('setWaiting', true)
     try {
       const dbMessage = await this.$axios.$post(`api/v1/dialog/${dialogId}`, message)
-      console.log('dbMessage', dbMessage)
       commit('addMessage', dbMessage)
     } catch (e) {
-      console.error(e.toString())
+      // console.error(e.toString())
     }
     commit('setWaiting', false)
   },
@@ -85,14 +86,12 @@ export const actions = {
     try {
       const dbDialog = await this.$axios.$post(`api/v1/dialog/new/${contactId}`, {})
       await dispatch('fetch', dbDialog.id)
-      console.log('dbDialog', dbDialog)
     } catch (e) {
-      console.error(e.toString())
+      // console.error(e.toString())
     }
     commit('setWaiting', false)
   },
   receive ({ commit }, wsMessage) {
-    console.log('wsMessage', wsMessage)
     commit('addMessage', wsMessage)
   }
 }

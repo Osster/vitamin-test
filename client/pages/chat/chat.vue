@@ -1,24 +1,39 @@
 <template>
-  <div class="chat flex flex-row flex-nowrap divide-x divide-light-blue-400">
-    <div class="chat-contacts w-1/4">
+  <div class="chat flex flex-row flex-nowrap divide-x divide-light-blue-400 h-full">
+    <div
+      :class="{ 'hidden': contactId }"
+      class="chat-contacts md:block w-full md:w-1/4">
       <contact-list
         :contacts="contacts"
         :selected="contactId"
-        @select="onContactSelect"></contact-list>
+        @select="onContactSelect"
+      />
     </div>
-    <div class="chat-messages w-3/4">
-      <message-list
-        :contact="contactId"
-        :messages="messages"
-        :key="messagesKey"
+    <div
+      :class="{ 'w-full': contactId }"
+      class="chat-messages md:w-3/4 flex flex-col justify-end"
+    >
+      <div
+        v-if="contact"
+        class="sm:hidden border py-2 px-4 flex flex-row justify-between"
       >
-        <div class="text-center text-xl font-bold">Select contact to start chattig.</div>
-      </message-list>
+        <strong>{{ contact ? contact.name : '' }}</strong>
+        <button
+          class="border rounded px-2 py0"
+          @click="onBackToList"
+        >X</button>
+      </div>
+      <message-list
+        ref="messageList"
+        :key="messagesKey"
+        :messages="messages"
+        :contact="contactId"
+      />
       <message-form
         v-if="contactId"
         v-model="message"
         @send="onSendMessage"
-      ></message-form>
+      />
     </div>
   </div>
 </template>
@@ -37,16 +52,13 @@ export default {
     if (store.getters['contacts/items'].length === 0) {
       await store.dispatch('contacts/fetch')
     }
-    if (store.getters['contacts/selected'] !== null) {
-      await store.dispatch('dialog/fetch', store.getters['contacts/selected'])
+    const contacts = store.getters['contacts/items']
+      .filter(c => c.dialog_id)
+      .map(c => c.dialog_id)
+    store.dispatch('dialog/hydrate', contacts)
+    if (store.getters['dialog/id'] !== null) {
+      await store.dispatch('dialog/fetch', store.getters['dialog/id'])
     }
-  },
-  mounted () {
-    this.$echo.channel('home')
-      .listen('NewMessage', (data) => {
-        this.$store.dispatch('dialog/receive', data.message)
-      })
-    this.$store.dispatch('dialog/hydrate', this.contacts.filter(c => c.dialog_id).map(c => c.dialog_id))
   },
   computed: {
     contacts () {
@@ -54,6 +66,11 @@ export default {
     },
     contactId () {
       return this.$store.getters['contacts/selected']
+    },
+    contact () {
+      return this.contactId && this.contacts
+        ? this.contacts.find(c => c.id === this.contactId)
+        : null
     },
     dialogId () {
       return this.$store.getters['dialog/id']
@@ -65,7 +82,6 @@ export default {
         items &&
         typeof items[this.dialogId] !== 'undefined'
       ) {
-        console.log({ items, dId: this.dialogId, dItems: items[this.dialogId] })
         return Object.values(items[this.dialogId])
       }
       return []
@@ -74,10 +90,13 @@ export default {
       return this.messages.length
     }
   },
-  watch: {
-    messages (messages) {
-      console.log({ messages })
-    }
+  mounted () {
+    this.$echo.channel('home')
+      .listen('NewMessage', (data) => {
+        this.$store.dispatch('dialog/receive', data.message)
+        this.scrollDown()
+      })
+    this.scrollDown()
   },
   methods: {
     async onContactSelect (contact) {
@@ -86,13 +105,14 @@ export default {
         try {
           if (contact.dialog_id !== null) {
             await this.$store.dispatch('dialog/fetch', contact.dialog_id)
+            this.scrollDown()
           } else {
             await this.$store.dispatch('dialog/create', contact.id)
             await this.$store.dispatch('contacts/fetch', contact.id)
           }
         } catch (e) {
           this.$store.dispatch('contacts/select', null)
-          console.error(e.toString())
+          // console.error(e.toString())
         }
       } else {
         this.$store.dispatch('contacts/select', null)
@@ -105,16 +125,32 @@ export default {
           message: this.message
         }
         await this.$store.dispatch('dialog/send', data)
+        this.scrollDown()
       } catch (e) {
-        console.error(e.toString())
+        // console.error(e.toString())
       }
+    },
+    onBackToList () {
+      this.$store.dispatch('contacts/select', null)
+    },
+    scrollDown () {
+      this.$nextTick(() => {
+        if (this.$refs.messageList) {
+          const el = this.$refs.messageList.$el
+          el.scrollTop = el.scrollHeight
+        }
+      })
     }
   }
 }
 </script>
 
-<style scoped>
+<style lang="scss">
 .chat {
-  text-align: center;
+  height: calc(100vh - 74px);
+}
+
+.chat-messages {
+  @apply h-full;
 }
 </style>
