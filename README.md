@@ -1,4 +1,9 @@
 ## Install
+### Rename files
+1. <code>backend/.env.example</code> to <code>backend/.env</code><br>
+2. <code>client/.env.example</code> to <code>client/.env</code><br>
+3. <code>.env.example</code> to <code>.env</code>
+
 ### Add to hosts file:
 <code>127.0.0.150 vitamin-test.loc</code>
 
