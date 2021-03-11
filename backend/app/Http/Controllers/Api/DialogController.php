@@ -27,7 +27,8 @@ class DialogController extends Controller
         return response()->json($messages);
     }
 
-    public function create(Request $request, User $user): JsonResponse {
+    public function create(Request $request, User $user): JsonResponse
+    {
 
         $dlg = Dialog::withUser($user)
             ->first();
@@ -80,7 +81,13 @@ class DialogController extends Controller
     {
         $this->validate($request, [
             "id" => "nullable|integer",
-            "body" => "required|min:1"
+            "body" => [
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->files->count() == 0 && is_null($value)) {
+                        $fail('The ' . $attribute . ' can not be empty.');
+                    }
+                },
+            ]
         ]);
 
         $msg = ($request->id)

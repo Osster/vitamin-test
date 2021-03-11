@@ -17,7 +17,7 @@ class CreateMessagesTable extends Migration
             $table->id();
             $table->bigInteger("dialog_id")->unsigned();
             $table->bigInteger("user_id")->unsigned();
-            $table->text("body");
+            $table->text("body")->nullable();
             $table->timestamps();
             $table->softDeletes();
 
