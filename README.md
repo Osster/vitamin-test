@@ -12,6 +12,6 @@
 
 
 ### Artisan (run inside php_fpm)
-<code>php artisan migrate</code>
+<code>php artisan migrate --seed</code>
 <code>php artisan storage:link</code>
 

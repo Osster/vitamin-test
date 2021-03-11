@@ -38,5 +38,17 @@ class UserSeeder extends Seeder
             'email' => 'morty@gmail.com',
             'password' => Hash::make('pass'),
         ]);
+
+        $users = DB::table('users')->get();
+
+        $alex = collect($users)->first();
+
+        for ($i = 1; $i < count($users); $i++) {
+            DB::table("contacts")
+                ->insert([
+                    "user_1_id" => $alex->id,
+                    "user_2_id" => $users[$i]->id
+                ]);
+        }
     }
 }

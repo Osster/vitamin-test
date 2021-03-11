@@ -12,9 +12,4 @@ class IndexController extends Controller
     {
         return response()->json(["result" => "OK"]);
     }
-
-    public function test(Request $request): JsonResponse
-    {
-        return response()->json(["result" => "OK", "type" => "post"]);
-    }
 }

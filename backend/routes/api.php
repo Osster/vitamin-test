@@ -35,6 +35,9 @@ Route::prefix("v1")
         Route::middleware('auth:sanctum')->group(function () {
 
             Route::get('contacts', [\App\Http\Controllers\Api\ContactsController::class, "all"]);
+            Route::post('contacts', [\App\Http\Controllers\Api\ContactsController::class, "create"]);
+            Route::get('contacts/search', [\App\Http\Controllers\Api\ContactsController::class, "search"]);
+
             Route::post('dialog/new/{user}', [\App\Http\Controllers\Api\DialogController::class, "create"]);
             Route::get('dialog/{dialog}', [\App\Http\Controllers\Api\DialogController::class, "index"]);
             Route::post('dialog/{dialog}', [\App\Http\Controllers\Api\DialogController::class, "send"]);
@@ -43,6 +46,5 @@ Route::prefix("v1")
         });
 
         Route::get("/", [\App\Http\Controllers\Api\IndexController::class, "index"]);
-        Route::post("/test", [\App\Http\Controllers\Api\IndexController::class, "test"]);
 
     });

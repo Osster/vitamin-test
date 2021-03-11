@@ -131,6 +131,7 @@ export default {
           message: this.message
         }
         await this.$store.dispatch('dialog/send', data)
+        this.message = null
         this.scrollDown()
       } catch (e) {
         // console.error(e.toString())
