@@ -71,7 +71,7 @@ export const actions = {
   hydrate ({ commit }, ids) {
     commit('hydrate', ids)
   },
-  async fetchDialod ({ commit, dispatch }, dialogId) {
+  async fetchDialog ({ commit, dispatch }, dialogId) {
     commit('setWaiting', true)
     try {
       const items = await this.$axios.$get(`api/v1/dialog/${dialogId}`)
@@ -82,11 +82,11 @@ export const actions = {
     }
     commit('setWaiting', false)
   },
-  async createDialod ({ commit, dispatch }, contactId) {
+  async createDialog ({ commit, dispatch }, contactId) {
     commit('setWaiting', true)
     try {
       const dbDialog = await this.$axios.$post(`api/v1/dialog/new/${contactId}`, {})
-      await dispatch('fetch', dbDialog.id)
+      await dispatch('fetchDialog', dbDialog.id)
     } catch (e) {
       // console.error(e.toString())
     }
@@ -137,5 +137,15 @@ export const actions = {
       dialogId: wsMessage.dialog_id,
       messageId: wsMessage.id
     })
+  },
+  async markMessageAsRead ({ commit }, { dialogId, messageId }) {
+    commit('setWaiting', true)
+    try {
+      const items = await this.$axios.$post(`api/v1/dialog/${dialogId}/read`, { messages: [messageId] })
+      commit('setItems', items)
+    } catch (e) {
+      // console.error(e.toString())
+    }
+    commit('setWaiting', false)
   }
 }

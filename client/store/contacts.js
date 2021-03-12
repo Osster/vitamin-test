@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import * as Cookies from 'js-cookie'
 import cookie from 'cookie'
 
@@ -17,6 +18,23 @@ export const mutations = {
   setSelected (state, itemId) {
     state.selected = itemId
     Cookies.set('selectedContact', itemId)
+  },
+  increaseUnread (state, userId) {
+    if (state.selected !== userId) {
+      const contact = state.items.find(i => i.id === userId)
+      if (contact) {
+        Vue.set(contact, 'm_unread', contact.m_unread + 1)
+      }
+    }
+  },
+  decreaseUnread (state, userId) {
+    const contact = state.items
+      .find((i) => {
+        return parseInt(i.id, 10) === parseInt(userId, 10)
+      })
+    if (contact) {
+      Vue.set(contact, 'm_unread', contact.m_unread - 1)
+    }
   }
 }
 
@@ -41,5 +59,11 @@ export const actions = {
   },
   select ({ commit }, itemId) {
     commit('setSelected', itemId)
+  },
+  increaseUnread ({ commit }, userId) {
+    commit('increaseUnread', userId)
+  },
+  decreaseUnread ({ commit }, { userId }) {
+    commit('decreaseUnread', userId)
   }
 }

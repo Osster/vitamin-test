@@ -40,6 +40,12 @@ export default {
       default: null
     }
   },
+  mounted () {
+    // console.log('message', this.message.id)
+    if (this.message.unread) {
+      this.$emit('mark-as-read', this.message.id)
+    }
+  },
   computed: {
     displayBody () {
       return this.message.body && this.message.body.replaceAll(/\n/g, '<br>')

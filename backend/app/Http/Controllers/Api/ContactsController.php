@@ -17,21 +17,36 @@ class ContactsController extends Controller
         $myId = Auth::id();
 
         $contacts = User::query()
-            ->join("contacts as c", "users.id", "=", DB::raw("IF(user_1_id = '$myId}', user_2_id, user_1_id)"))
+            ->join("contacts as c", "users.id", "=", DB::raw("IF(user_1_id = {$myId}, user_2_id, user_1_id)"))
+            ->leftJoin("dialogs as dg", "dg.id", "=", "c.dialog_id")
+            ->leftJoin("messages as m", "m.dialog_id", "=", "dg.id")
+            ->leftJoin('message_user as mu', function ($query) use ($myId) {
+                $query
+                    ->whereRaw("mu.message_id = m.id")
+                    ->whereRaw("mu.user_id = {$myId}")
+                    ->whereNull("mu.viewed_at");
+            })
             ->select([
                 "users.id",
                 "users.name",
                 "users.email",
-                "c.dialog_id"
+                "c.dialog_id",
+                DB::raw("COUNT(m.id) as m_total"),
+                DB::raw("COUNT(mu.id) as m_unread")
             ])
             ->where(function ($query) use ($myId) {
                 $query
                     ->where("user_1_id", $myId)
                     ->orWhere("user_2_id", $myId);
             })
-            ->get();
+            ->whereNull("dg.deleted_at")
+            ->whereNull("m.deleted_at")
+            ->groupBy([
+                "users.id",
+                "c.dialog_id"
+            ]);
 
-        return response()->json($contacts);
+        return response()->json($contacts->get());
     }
 
     public function create(Request $request, User $user): JsonResponse

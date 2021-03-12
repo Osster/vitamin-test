@@ -38,6 +38,7 @@
         :contact="contactId"
         @edit="onMessageEdit"
         @delete="onMessageDelete"
+        @mark-as-read="onMessageMarkAsRead"
       />
       <message-form
         v-if="contactId"
@@ -68,7 +69,7 @@ export default {
     store.dispatch('dialog/hydrate', contacts)
     const dialogId = store.getters['dialog/id']
     if (dialogId) {
-      await store.dispatch('dialog/fetchDialod', dialogId)
+      await store.dispatch('dialog/fetchDialog', dialogId)
     }
   },
   computed: {
@@ -106,6 +107,7 @@ export default {
       .private(`App.User.${this.$auth.user.id}`)
       .listen('NewMessage', (data) => {
         this.$store.dispatch('dialog/receiveMessage', data.message)
+        this.$store.dispatch('contacts/increaseUnread', data.message.user_id)
         this.scrollDown()
       })
       .listen('DeleteMessage', (data) => {
@@ -120,10 +122,10 @@ export default {
         this.$store.dispatch('contacts/select', contact.id)
         try {
           if (contact.dialog_id !== null) {
-            await this.$store.dispatch('dialog/fetchDialod', contact.dialog_id)
+            await this.$store.dispatch('dialog/fetchDialog', contact.dialog_id)
             this.scrollDown()
           } else {
-            await this.$store.dispatch('dialog/createDialod', contact.id)
+            await this.$store.dispatch('dialog/createDialog', contact.id)
             await this.$store.dispatch('contacts/fetch', contact.id)
           }
         } catch (e) {
@@ -153,6 +155,10 @@ export default {
         dialogId: message.dialog_id,
         messageId: message.id
       })
+    },
+    async onMessageMarkAsRead (messageId) {
+      await this.$store.dispatch('dialog/markMessageAsRead', { dialogId: this.dialogId, messageId })
+      this.$store.dispatch('contacts/decreaseUnread', { userId: this.contactId })
     },
     onBackToList () {
       this.$store.dispatch('contacts/select', null)

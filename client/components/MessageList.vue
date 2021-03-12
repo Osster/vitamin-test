@@ -10,6 +10,7 @@
       :contact="contact"
       @edit="onMessageEdit"
       @delete="onMessageDelete"
+      @mark-as-read="markAsRead"
     />
   </div>
 </template>
@@ -40,6 +41,9 @@ export default {
     },
     onMessageDelete (message) {
       this.$emit('delete', message)
+    },
+    markAsRead (messageId) {
+      this.$emit('mark-as-read', messageId)
     }
   }
 }

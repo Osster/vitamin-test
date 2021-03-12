@@ -9,6 +9,10 @@
     >
       <span>
         {{ contact.name }}
+        <span
+          v-if="contact.m_unread > 0"
+          class="bg-green-400 rounded-full text-xs text-white px-1 py0"
+        >{{ contact.m_unread }}</span>
       </span>
     </a>
   </div>
