@@ -11,7 +11,7 @@ export const store = () => ({
 
 export const mutations = {
   setWaiting (state, waiting) {
-    state.waiting = waiting
+    Vue.set(state, 'waiting', waiting)
   },
   hydrate (state, ids) {
     if (typeof state.items === 'undefined') {
@@ -24,7 +24,7 @@ export const mutations = {
     })
   },
   setId (state, id) {
-    state.id = id
+    Vue.set(state, 'id', id)
     Cookies.set('selectedDialog', id)
   },
   setItems (state, items) {
@@ -33,21 +33,25 @@ export const mutations = {
       if (typeof _items[i.dialog_id] === 'undefined') {
         _items[i.dialog_id] = {}
       }
-      _items[i.dialog_id][i.id] = i
+      _items[i.dialog_id][i.at] = i
     })
-    state.items = _items
+    Vue.set(state, 'items', _items)
   },
   addMessage (state, message) {
     if (typeof state.items[message.dialog_id] === 'undefined') {
       state.items[message.dialog_id] = {}
     }
-    Vue.set(state.items[message.dialog_id], message.id, message)
+    Vue.set(state.items[message.dialog_id], message.at, message)
   },
   clearMessage (state, { dialogId, messageId }) {
     if (typeof state.items[dialogId] === 'undefined') {
       state.items[dialogId] = {}
     }
-    Vue.delete(state.items[dialogId], messageId)
+    const message = Object.values(state.items[dialogId])
+      .find(m => m.id === messageId)
+    if (message) {
+      Vue.delete(state.items[dialogId], message.at)
+    }
   }
 }
 
@@ -67,18 +71,31 @@ export const actions = {
   hydrate ({ commit }, ids) {
     commit('hydrate', ids)
   },
-  async fetch ({ commit }, dialogId) {
+  async fetchDialod ({ commit, dispatch }, dialogId) {
     commit('setWaiting', true)
     try {
       const items = await this.$axios.$get(`api/v1/dialog/${dialogId}`)
-      commit('setId', dialogId)
       commit('setItems', items)
+      dispatch('selectDialog', dialogId)
     } catch (e) {
       // console.error(e.toString())
     }
     commit('setWaiting', false)
   },
-  async send ({ commit }, { dialogId, message }) {
+  async createDialod ({ commit, dispatch }, contactId) {
+    commit('setWaiting', true)
+    try {
+      const dbDialog = await this.$axios.$post(`api/v1/dialog/new/${contactId}`, {})
+      await dispatch('fetch', dbDialog.id)
+    } catch (e) {
+      // console.error(e.toString())
+    }
+    commit('setWaiting', false)
+  },
+  selectDialog ({ commit }, dialogId) {
+    commit('setId', dialogId)
+  },
+  async sendMessage ({ commit }, { dialogId, message }) {
     commit('setWaiting', true)
     try {
       const data = new FormData()
@@ -102,7 +119,7 @@ export const actions = {
     }
     commit('setWaiting', false)
   },
-  async delete ({ commit }, { dialogId, messageId }) {
+  async deleteMessage ({ commit }, { dialogId, messageId }) {
     commit('setWaiting', true)
     try {
       await this.$axios.$delete(`api/v1/dialog/${dialogId}/${messageId}`)
@@ -112,20 +129,10 @@ export const actions = {
     }
     commit('setWaiting', false)
   },
-  async create ({ commit, dispatch }, contactId) {
-    commit('setWaiting', true)
-    try {
-      const dbDialog = await this.$axios.$post(`api/v1/dialog/new/${contactId}`, {})
-      await dispatch('fetch', dbDialog.id)
-    } catch (e) {
-      // console.error(e.toString())
-    }
-    commit('setWaiting', false)
-  },
-  receive ({ commit }, wsMessage) {
+  receiveMessage ({ commit }, wsMessage) {
     commit('addMessage', wsMessage)
   },
-  clear ({ commit }, wsMessage) {
+  clearMessage ({ commit }, wsMessage) {
     commit('clearMessage', {
       dialogId: wsMessage.dialog_id,
       messageId: wsMessage.id

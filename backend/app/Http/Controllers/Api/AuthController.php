@@ -35,7 +35,10 @@ class AuthController extends Controller
             }
 
             return response()
-                ->json(["result" => "OK", "u" => Auth::id(), "t" => $tokens], 200)
+                ->json([
+                    "result" => "OK",
+                    "token" => $token->plainTextToken
+                ], 200)
                 ->header('Authorization', "Bearer {$token->plainTextToken}");
 
         }

@@ -60,6 +60,10 @@ export default {
     baseURL: 'http://vitamin-test.loc'
   },
   
+  proxy: {
+    '/api/': 'http://nginx',
+  },
+  
   auth: {
     strategies: {
       laravelSanctum: {
@@ -69,40 +73,44 @@ export default {
           login: {url: '/api/v1/auth/login', method: 'post'},
           logout: {url: '/api/v1/auth/logout', method: 'post'},
           user: {url: '/api/v1/auth/user', method: 'get'}
-        },
-        redirect: {
-          login: '/login',
-          logout: '/',
-          callback: '/chat',
-          home: '/'
         }
       }
     },
-    watchLoggedIn: true,
-    localStorage: {
-      prefix: 'auth.'
+    redirect: {
+      login: '/login',
+      logout: '/',
+      callback: '/chat',
+      home: '/'
     },
     token: {
-      property: 'token',
-      required: true,
-      type: 'Bearer'
+      name: 'Bearer'
     },
     user: {
       property: 'user',
       autoFetch: false
-    }
+    },
+    cookie: {
+      name: 'XSRF-TOKEN',
+    },
+    watchLoggedIn: true,
+    plugins: [ { src: '~/plugins/auth.js', ssr: false } ]
   },
   echo: {
     broadcaster: 'pusher',
-    // authModule: true,
-    // connectOnLogin: true,
+    authModule: true,
+    connectOnLogin: true,
     forceTLS: false,
-    authEndpoint: process.env.API_URL + '/broadcasting/auth',
+    authEndpoint: process.env.API_URL_BROWSER + '/api/broadcasting/auth',
     key: process.env.WEBSOCKET_KEY,
     wsHost: process.env.WEBSOCKET_HOST,
     wsPort: process.env.WEBSOCKET_PORT,
     encrypted: false,
-    disableStats: true
+    disableStats: true,
+    auth: {
+      headers: {
+        'X-XSRF-TOKEN': ''
+      }
+    }
   },
   styleResources: {
     scss: ["./assets/scss/*.scss"]

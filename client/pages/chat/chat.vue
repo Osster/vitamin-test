@@ -3,6 +3,14 @@
     <div
       :class="{ 'hidden': contactId }"
       class="chat-contacts md:block w-full md:w-1/4">
+      <client-only>
+        <div
+          v-if="$auth.loggedIn"
+          class="py-2 px-2 text-center border-t border-b"
+        >
+          <strong>{{ $auth.user.name }}</strong>
+        </div>
+      </client-only>
       <contact-list
         :contacts="contacts"
         :selected="contactId"
@@ -11,7 +19,7 @@
     </div>
     <div
       :class="{ 'w-full': contactId }"
-      class="chat-messages md:w-3/4 flex flex-col justify-end"
+      class="chat-messages md:w-3/4 flex flex-col justify-between"
     >
       <div
         v-if="contact"
@@ -58,8 +66,9 @@ export default {
       .filter(c => c.dialog_id)
       .map(c => c.dialog_id)
     store.dispatch('dialog/hydrate', contacts)
-    if (store.getters['dialog/id'] !== null) {
-      await store.dispatch('dialog/fetch', store.getters['dialog/id'])
+    const dialogId = store.getters['dialog/id']
+    if (dialogId) {
+      await store.dispatch('dialog/fetchDialod', dialogId)
     }
   },
   computed: {
@@ -84,22 +93,23 @@ export default {
         items &&
         typeof items[this.dialogId] !== 'undefined'
       ) {
-        return Object.values(items[this.dialogId])
+        return Object.values(items[this.dialogId]).reverse()
       }
       return []
     },
     messagesKey () {
-      return this.messages.length
+      return this.dialogId
     }
   },
   mounted () {
-    this.$echo.channel('home')
+    this.$echo
+      .private(`App.User.${this.$auth.user.id}`)
       .listen('NewMessage', (data) => {
-        this.$store.dispatch('dialog/receive', data.message)
+        this.$store.dispatch('dialog/receiveMessage', data.message)
         this.scrollDown()
       })
       .listen('DeleteMessage', (data) => {
-        this.$store.dispatch('dialog/clear', data.message)
+        this.$store.dispatch('dialog/clearMessage', data.message)
         this.scrollDown()
       })
     this.scrollDown()
@@ -110,18 +120,19 @@ export default {
         this.$store.dispatch('contacts/select', contact.id)
         try {
           if (contact.dialog_id !== null) {
-            await this.$store.dispatch('dialog/fetch', contact.dialog_id)
+            await this.$store.dispatch('dialog/fetchDialod', contact.dialog_id)
             this.scrollDown()
           } else {
-            await this.$store.dispatch('dialog/create', contact.id)
+            await this.$store.dispatch('dialog/createDialod', contact.id)
             await this.$store.dispatch('contacts/fetch', contact.id)
           }
         } catch (e) {
           this.$store.dispatch('contacts/select', null)
-          // console.error(e.toString())
+          this.$store.dispatch('dialog/selectDialog', null)
         }
       } else {
         this.$store.dispatch('contacts/select', null)
+        this.$store.dispatch('dialog/selectDialog', null)
       }
     },
     async onSendMessage () {
@@ -130,7 +141,7 @@ export default {
           dialogId: this.dialogId,
           message: this.message
         }
-        await this.$store.dispatch('dialog/send', data)
+        await this.$store.dispatch('dialog/sendMessage', data)
         this.message = null
         this.scrollDown()
       } catch (e) {
@@ -138,14 +149,14 @@ export default {
       }
     },
     async onMessageDelete (message) {
-      await this.$store.dispatch('dialog/delete', {
+      await this.$store.dispatch('dialog/deleteMessage', {
         dialogId: message.dialog_id,
         messageId: message.id
       })
-      console.log('delete', message)
     },
     onBackToList () {
       this.$store.dispatch('contacts/select', null)
+      this.$store.dispatch('dialog/selectDialog', null)
     },
     onMessageEdit (message) {
       this.message = {

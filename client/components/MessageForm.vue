@@ -7,6 +7,7 @@
         @click.prevent="onImageSelect"
       >Attach</button>
       <textarea
+        ref="messageText"
         id="message"
         v-model="message"
         :style="`height:${taHeight}px`"
@@ -111,6 +112,9 @@ export default {
         }
       })(img)
       reader.readAsDataURL(file)
+      if (vm.$refs.messageText) {
+        vm.$refs.messageText.focus()
+      }
     }
   }
 }

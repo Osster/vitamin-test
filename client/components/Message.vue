@@ -20,7 +20,7 @@
     </div>
     <div class="text-md" v-html="displayBody" />
     <div class="text-xs text-grey-300">
-      {{ message.at }}
+      {{ displayTime }}
     </div>
     <button v-if="$auth.user.id === message.user_id" class="text-yellow-200" @click="onMessageEdit">Edit</button>
     <button v-if="$auth.user.id === message.user_id" class="text-red-500" @click="onMessageDelete">Delete</button>
@@ -42,7 +42,15 @@ export default {
   },
   computed: {
     displayBody () {
-      return this.message.body.replaceAll(/\n/g, '<br>')
+      return this.message.body && this.message.body.replaceAll(/\n/g, '<br>')
+    },
+    displayTime () {
+      const date = new Date(this.message.at * 1000)
+      const hours = date.getHours()
+      const minutes = date.getMinutes()
+      const day = date.getDay()
+      const month = date.getMonth()
+      return `${month < 10 ? `0${month}` : month}/${day < 10 ? `0${day}` : day} at ${hours}:${minutes}`
     }
   },
   methods: {

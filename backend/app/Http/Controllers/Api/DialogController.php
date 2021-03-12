@@ -22,7 +22,9 @@ class DialogController extends Controller
 {
     public function index(Request $request, Dialog $dialog): JsonResponse
     {
-        $messages = $dialog->messages()->with(["attachments"])->get();
+        $messages = $dialog->messages()
+            ->with(["attachments"])
+            ->get();
 
         return response()->json($messages);
     }

@@ -35,7 +35,7 @@ class Message extends Model
 
     public function getAtAttribute()
     {
-        return $this->updated_at->diffForHumans();
+        return $this->updated_at->timestamp;
     }
 
     public function getAttachmentsAttribute()
