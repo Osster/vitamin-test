@@ -71,12 +71,11 @@ services:
       dockerfile: .docker/db-mysql/Dockerfile
     volumes:
       - database:/var/lib/mysql
-      - ./.docker/mysql/mysqlconf:/etc/mysql/conf.d
     ports:
         - 33061:3306
     environment:
       - "MYSQL_DATABASE=db-chat"
-      - "MYSQL_USER=root"
+      - "MYSQL_USER=homestead"
       - "MYSQL_PASSWORD=pass"
       - "MYSQL_ROOT_PASSWORD=pass"
     restart: always
@@ -94,7 +93,6 @@ services:
     environment:
       - "APP_ROOT=/var/www/client"
       - "NODE_ENV=development"
-    command: "npm run dev"
     restart: always
 
 ######### Volumes ###################################
